@@ -1,0 +1,33 @@
+{
+  "name": "tiny24",
+  "version": "0.5.0",
+  "description": "算24点",
+  "main": "./dist/index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "tslint": "^5.12.1",
+    "typescript": "^3.2.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "npx tslint ./index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seekerlee/tiny24.git"
+  },
+  "keywords": [
+    "算24点",
+    "24点",
+    "算24",
+    "24 game",
+    "calculate 24",
+    "math 24"
+  ],
+  "author": "simon1987.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/seekerlee/tiny24/issues"
+  },
+  "homepage": "https://github.com/seekerlee/tiny24#readme"
+}
