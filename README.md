@@ -25,7 +25,6 @@ const pp = suan24(4, 6, 7, 9, 89)
 const vv = pp.next().value
 const str = expressionToString(vv)
 console.log(str) // will print ((4 + 6) + ((9 + 89) / 7))
-
 ```
 
 ```javascript
