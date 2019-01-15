@@ -85,30 +85,32 @@ function evaluate(expression: Expression): FractionalNum {
             }
         }
     }
+    throw new Error() // satisfy type checker
 }
 
-function toString(expression: Expression): string {
+export function expressionToString(expression: Expression): string {
     if (expression instanceof ValueExpression) {
-        return String(expression.value)
+        return expression.value.toString()
     } else if (expression instanceof OperationExpression) {
         switch (expression.operator) {
             case Operator.ADD: {
-                return `(${toString(expression.lValue)} + ${toString(expression.rValue)})`
+                return `(${expressionToString(expression.lValue)} + ${expressionToString(expression.rValue)})`
             }
             case Operator.SUB: {
-                return `(${toString(expression.lValue)} - ${toString(expression.rValue)})`
+                return `(${expressionToString(expression.lValue)} - ${expressionToString(expression.rValue)})`
             }
             case Operator.MUL: {
-                return `(${toString(expression.lValue)} * ${toString(expression.rValue)})`
+                return `(${expressionToString(expression.lValue)} * ${expressionToString(expression.rValue)})`
             }
             case Operator.DIV: {
-                return `(${toString(expression.lValue)} / ${toString(expression.rValue)})`
+                return `(${expressionToString(expression.lValue)} / ${expressionToString(expression.rValue)})`
             }
         }
     }
+    throw new Error() // satisfy type checker
 }
 
-function* joinExpressions(expressions: Expression[]) {
+function* joinExpressions(expressions: Expression[]): IterableIterator<Expression> {
     if (expressions.length === 0) {
         throw new Error("no input error")
     }
@@ -134,19 +136,17 @@ function* joinExpressions(expressions: Expression[]) {
     }
 }
 
-export function suan(target: number, ...nums: number[]) {
+export function* suan(target: number, ...nums: number[]) {
     const exps = nums.map((num) => new ValueExpression(new FractionalNum(num)))
     const expressionIter = joinExpressions(exps)
-    let i = 0
     while (true) {
         const it = expressionIter.next()
         if (it.done) {
             break
         } else {
-            i ++
             const expression = it.value
             if (evaluate(expression).equals(new FractionalNum(target))) {
-                // console.log(toString(expression));
+                yield expression
             }
         }
     }
