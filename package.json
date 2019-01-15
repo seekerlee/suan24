@@ -3,6 +3,9 @@
   "version": "0.5.0",
   "description": "算24点",
   "main": "./dist/index.js",
+  "bin": {
+    "myapp": "./bin/suan24.js"
+  },
   "dependencies": {},
   "devDependencies": {
     "tslint": "^5.12.1",
@@ -11,6 +14,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npx tslint ./index.ts",
+    "build": "npx tsc -p ./tsconfig.json",
     "watch": "npx tsc --watch -p ./tsconfig.json"
   },
   "repository": {
