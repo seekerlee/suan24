@@ -10,7 +10,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "npx tslint ./index.ts"
+    "lint": "npx tslint ./index.ts",
+    "watch": "npx tsc --watch -p ./tsconfig.json"
   },
   "repository": {
     "type": "git",
