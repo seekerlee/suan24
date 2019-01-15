@@ -1,6 +1,6 @@
 {
   "name": "suan24",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "算24点",
   "main": "./dist/index.js",
   "bin": {
