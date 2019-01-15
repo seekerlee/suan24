@@ -25,7 +25,7 @@ if (process.argv.length <= 2) {
         const thisArg = process.argv[i]
         if (thisArg === '--help' || thisArg === '-h') {
             console.log(descryption)
-            break
+            process.exit()
         } else if (thisArg === '--target' || thisArg === '-t') {
             isGettingTarget = true
         } else {
