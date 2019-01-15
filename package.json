@@ -4,7 +4,7 @@
   "description": "算24点",
   "main": "./dist/index.js",
   "bin": {
-    "myapp": "./bin/suan24.js"
+    "suan24": "./bin/suan24.js"
   },
   "dependencies": {},
   "devDependencies": {
