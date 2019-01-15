@@ -13,6 +13,7 @@ Example:
 you can try more numbers, for example 5 numbers:
     suan24 4 6 7 9 89
 about:
+    A simple program to resolve suan 24 (calculate 24) game
     this program is presented by Simon1987.com`
 
 if (process.argv.length <= 2) {
