@@ -125,27 +125,29 @@ function evaluate(expression: Expression): FractionalNum | undefined {
     throw new Error("input is not an Expression") // satisfy type checker
 }
 
-export function expressionToString(expression: Expression, parentOperator?: Operator, position?: PositionInOperator): string {
+export function expressionToString(expression: Expression, keepParentheses: boolean = false, parentOperator?: Operator, position?: PositionInOperator): string {
     if (expression instanceof ValueExpression) {
         return expression.value.toString()
     } else if (expression instanceof OperationExpression) {
         let needParen = true
-        if (parentOperator === undefined) {
-            needParen = false
-        } else {
-            const opCompare = OperatorCompare(expression.operator, parentOperator)
-            if (opCompare > 0) {
+        if (!keepParentheses) {
+            if (parentOperator === undefined) {
                 needParen = false
-            } else if (opCompare === 0) {
-                if (parentOperator === Operator.ADD || parentOperator === Operator.MUL) {
+            } else {
+                const opCompare = OperatorCompare(expression.operator, parentOperator)
+                if (opCompare > 0) {
                     needParen = false
-                } else if (parentOperator === Operator.SUB) {
-                    if (position === PositionInOperator.LEFT) {
+                } else if (opCompare === 0) {
+                    if (parentOperator === Operator.ADD || parentOperator === Operator.MUL) {
                         needParen = false
-                    }
-                } else if (parentOperator === Operator.DIV) {
-                    if (position === PositionInOperator.LEFT) {
-                        needParen = false
+                    } else if (parentOperator === Operator.SUB) {
+                        if (position === PositionInOperator.LEFT) {
+                            needParen = false
+                        }
+                    } else if (parentOperator === Operator.DIV) {
+                        if (position === PositionInOperator.LEFT) {
+                            needParen = false
+                        }
                     }
                 }
             }
@@ -154,19 +156,19 @@ export function expressionToString(expression: Expression, parentOperator?: Oper
         let thisString: string
         switch (expression.operator) {
             case Operator.ADD: {
-                thisString = `${expressionToString(expression.lValue, Operator.ADD, PositionInOperator.LEFT)} + ${expressionToString(expression.rValue, Operator.ADD, PositionInOperator.RIGHT)}`
+                thisString = `${expressionToString(expression.lValue, keepParentheses, Operator.ADD, PositionInOperator.LEFT)} + ${expressionToString(expression.rValue, keepParentheses, Operator.ADD, PositionInOperator.RIGHT)}`
                 break
             }
             case Operator.SUB: {
-                thisString = `${expressionToString(expression.lValue, Operator.SUB, PositionInOperator.LEFT)} - ${expressionToString(expression.rValue, Operator.SUB, PositionInOperator.RIGHT)}`
+                thisString = `${expressionToString(expression.lValue, keepParentheses, Operator.SUB, PositionInOperator.LEFT)} - ${expressionToString(expression.rValue, keepParentheses, Operator.SUB, PositionInOperator.RIGHT)}`
                 break
             }
             case Operator.MUL: {
-                thisString = `${expressionToString(expression.lValue, Operator.MUL, PositionInOperator.LEFT)} * ${expressionToString(expression.rValue, Operator.MUL, PositionInOperator.RIGHT)}`
+                thisString = `${expressionToString(expression.lValue, keepParentheses, Operator.MUL, PositionInOperator.LEFT)} × ${expressionToString(expression.rValue, keepParentheses, Operator.MUL, PositionInOperator.RIGHT)}`
                 break
             }
             case Operator.DIV: {
-                thisString = `${expressionToString(expression.lValue, Operator.DIV, PositionInOperator.LEFT)} / ${expressionToString(expression.rValue, Operator.DIV, PositionInOperator.RIGHT)}`
+                thisString = `${expressionToString(expression.lValue, keepParentheses, Operator.DIV, PositionInOperator.LEFT)} ÷ ${expressionToString(expression.rValue, keepParentheses, Operator.DIV, PositionInOperator.RIGHT)}`
                 break
             }
         }
