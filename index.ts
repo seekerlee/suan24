@@ -5,7 +5,14 @@ enum Operator {
     DIV,
 }
 
+Number.isInteger = Number.isInteger || ((value: any) => {
+    return typeof value === "number" &&
+      isFinite(value) &&
+      Math.floor(value) === value
+})
+
 class FractionalNum {
+    public static readonly ZERO = new FractionalNum(0)
     constructor(readonly num: number, readonly den: number = 1) {
         if (!Number.isInteger(num) || !Number.isInteger(den)) {
             throw new Error("must be interger")
@@ -23,28 +30,15 @@ class FractionalNum {
     public div(that: FractionalNum): FractionalNum {
         return new FractionalNum(this.num * that.den, this.den * that.num)
     }
-    public reduce(): FractionalNum {
-        function gcd(a: number, b: number): number {
-            if (b === 0) {
-                return a
-            }
-            return gcd(b, a % b)
-        }
-        if (this.den === 0) {
-            return new FractionalNum(this.num, this.den)
-        } else {
-            const divsor = gcd(this.den, this.num)
-            return new FractionalNum(this.num / divsor, this.den / divsor)
-        }
-    }
     public equals(that: FractionalNum): boolean {
         if (this.den === 0 && that.den === 0) {
             return this.num === that.num
-        } else if (this.den === 0 || that.den === 0) {
-            return false
         } else {
             return this.num * that.den === this.den * that.num
         }
+    }
+    public identicalTo(that: FractionalNum): boolean {
+        return this.num === that.num && this.den === that.den
     }
     public toString(): string {
         if (this.den === 1) {
@@ -56,7 +50,6 @@ class FractionalNum {
 }
 
 type Expression = ValueExpression | OperationExpression
-
 class ValueExpression {
     constructor(readonly value: FractionalNum) {}
 }
@@ -66,26 +59,50 @@ class OperationExpression {
     constructor(readonly operator: Operator, readonly lValue: Expression, readonly rValue: Expression) {}
 }
 
-function evaluate(expression: Expression): FractionalNum {
-    if (expression instanceof ValueExpression) {
+function isExpressionIdentical(exp1: Expression, exp2: Expression): boolean {
+    if (exp1 instanceof ValueExpression && exp2 instanceof ValueExpression) {
+        return exp1.value.identicalTo(exp2.value)
+    } else if (exp1 instanceof OperationExpression && exp2 instanceof OperationExpression) {
+        return exp1.operator === exp2.operator &&
+            isExpressionIdentical(exp1.lValue, exp2.lValue) &&
+            isExpressionIdentical(exp1.rValue, exp2.rValue)
+    } else {
+        return false
+    }
+}
+
+function evaluate(expression: Expression): FractionalNum | undefined {
+    if (expression instanceof ValueExpression) { // denominator can't be 0 here
         return expression.value
     } else if (expression instanceof OperationExpression) {
+        const lValueEval = evaluate(expression.lValue)
+        if (lValueEval === undefined) {
+            return // undefined
+        }
+        const rValueEval = evaluate(expression.rValue)
+        if (rValueEval === undefined) {
+            return // undefined
+        }
         switch (expression.operator) {
             case Operator.ADD: {
-                return evaluate(expression.lValue).add(evaluate(expression.rValue))
+                return lValueEval.add(rValueEval)
             }
             case Operator.SUB: {
-                return evaluate(expression.lValue).sub(evaluate(expression.rValue))
+                return lValueEval.sub(rValueEval)
             }
             case Operator.MUL: {
-                return evaluate(expression.lValue).mul(evaluate(expression.rValue))
+                return lValueEval.mul(rValueEval)
             }
             case Operator.DIV: {
-                return evaluate(expression.lValue).div(evaluate(expression.rValue))
+                if (rValueEval.equals(FractionalNum.ZERO)) {
+                    return // undefined
+                } else {
+                    return lValueEval.div(rValueEval)
+                }
             }
         }
     }
-    throw new Error() // satisfy type checker
+    throw new Error("input is not an Expression") // satisfy type checker
 }
 
 export function expressionToString(expression: Expression): string {
@@ -128,10 +145,12 @@ function* joinExpressions(expressions: Expression[]): IterableIterator<Expressio
             yield* joinExpressions(restExp.concat(muled))
             const dived = new OperationExpression(Operator.DIV, expressions[i], expressions[j])
             yield* joinExpressions(restExp.concat(dived))
-            const subed2 = new OperationExpression(Operator.SUB, expressions[j], expressions[i])
-            yield* joinExpressions(restExp.concat(subed2))
-            const dived2 = new OperationExpression(Operator.DIV, expressions[j], expressions[i])
-            yield* joinExpressions(restExp.concat(dived2))
+            if (!isExpressionIdentical(expressions[i], expressions[j])) {
+                const subed2 = new OperationExpression(Operator.SUB, expressions[j], expressions[i])
+                yield* joinExpressions(restExp.concat(subed2))
+                const dived2 = new OperationExpression(Operator.DIV, expressions[j], expressions[i])
+                yield* joinExpressions(restExp.concat(dived2))
+            }
         }
     }
 }
@@ -145,7 +164,8 @@ export function* suan(target: number, ...nums: number[]) {
             break
         } else {
             const expression = it.value
-            if (evaluate(expression).equals(new FractionalNum(target))) {
+            const expressionVal = evaluate(expression)
+            if (expressionVal && expressionVal.equals(new FractionalNum(target))) {
                 yield expression
             }
         }
