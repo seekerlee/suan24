@@ -170,6 +170,8 @@ export function expressionToString(expression: Expression, keepParentheses: bool
             case Operator.DIV: {
                 thisString = `${expressionToString(expression.lValue, keepParentheses, Operator.DIV, PositionInOperator.LEFT)} ÷ ${expressionToString(expression.rValue, keepParentheses, Operator.DIV, PositionInOperator.RIGHT)}`
                 break
+            } default: {
+                throw new Error("unknow operatir")
             }
         }
         if (needParen) {
@@ -178,7 +180,7 @@ export function expressionToString(expression: Expression, keepParentheses: bool
             return thisString
         }
     }
-    throw new Error() // satisfy type checker
+    throw new Error("not an expression") // satisfy type checker
 }
 
 function* joinExpressions(expressions: Expression[]): IterableIterator<Expression> {

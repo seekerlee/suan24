@@ -31,7 +31,7 @@ if (process.argv.length <= 2) {
             isGettingTarget = true
         } else {
             let thisNum = parseInt(thisArg)
-            if (thisNum) {
+            if (!isNaN(thisNum)) {
                 if (isGettingTarget) {
                     isGettingTarget = false
                     targetNum = thisNum
