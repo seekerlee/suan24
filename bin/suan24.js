@@ -6,6 +6,7 @@ normal mode:
 target mode with --target(or -t) option. You can specify other numbers instead of 24 as target.
     suan24 --target <target number> <numbers...>
     suan24 -t <target number> <numbers...>
+option --parentheses(or -p) will keep all parentheses of output required or not.
 Example:
     suan24 8 8 3 3
     suan24 4 6
@@ -20,6 +21,7 @@ if (process.argv.length <= 2) {
     console.log(descryption)
 } else {
     let isGettingTarget = false
+    let isKeepParentheses = false
     let nums = []
     let targetNum = 24
     for (let i = 2; i < process.argv.length; i ++) {
@@ -29,6 +31,8 @@ if (process.argv.length <= 2) {
             process.exit()
         } else if (thisArg === '--target' || thisArg === '-t') {
             isGettingTarget = true
+        }  else if (thisArg === '--parentheses' || thisArg === '-p') {
+            isKeepParentheses = true
         } else {
             let thisNum = parseInt(thisArg)
             if (!isNaN(thisNum)) {
@@ -50,7 +54,7 @@ if (process.argv.length <= 2) {
             console.log('all done')
             break
         } else {
-            let str = suan.expressionToString(next.value)
+            let str = suan.expressionToString(next.value, isKeepParentheses)
             console.log(str)
         }
     }
