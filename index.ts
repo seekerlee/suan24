@@ -5,6 +5,26 @@ enum Operator {
     DIV,
 }
 
+enum PositionInOperator {
+    LEFT, RIGHT,
+}
+
+function OperatorCompare(op1: Operator, op2: Operator): number {
+    if (op1 === Operator.ADD || op1 === Operator.SUB) {
+        if (op2 === Operator.ADD || op2 === Operator.SUB) {
+            return 0
+        } else { // op2 === Operator.MUL || op2 === Operator.DIV
+            return -1
+        }
+    } else { // op1 === Operator.MUL || op1 === Operator.DIV
+        if (op2 === Operator.ADD || op2 === Operator.SUB) {
+            return 1
+        } else { // op2 === Operator.MUL || op2 === Operator.DIV
+            return 0
+        }
+    }
+}
+
 Number.isInteger = Number.isInteger || ((value: any) => {
     return typeof value === "number" &&
       isFinite(value) &&
@@ -105,23 +125,55 @@ function evaluate(expression: Expression): FractionalNum | undefined {
     throw new Error("input is not an Expression") // satisfy type checker
 }
 
-export function expressionToString(expression: Expression): string {
+export function expressionToString(expression: Expression, parentOperator?: Operator, position?: PositionInOperator): string {
     if (expression instanceof ValueExpression) {
         return expression.value.toString()
     } else if (expression instanceof OperationExpression) {
+        let needParen = true
+        if (parentOperator === undefined) {
+            needParen = false
+        } else {
+            const opCompare = OperatorCompare(expression.operator, parentOperator)
+            if (opCompare > 0) {
+                needParen = false
+            } else if (opCompare === 0) {
+                if (parentOperator === Operator.ADD || parentOperator === Operator.MUL) {
+                    needParen = false
+                } else if (parentOperator === Operator.SUB) {
+                    if (position === PositionInOperator.LEFT) {
+                        needParen = false
+                    }
+                } else if (parentOperator === Operator.DIV) {
+                    if (position === PositionInOperator.LEFT) {
+                        needParen = false
+                    }
+                }
+            }
+        }
+        // make string
+        let thisString: string
         switch (expression.operator) {
             case Operator.ADD: {
-                return `(${expressionToString(expression.lValue)} + ${expressionToString(expression.rValue)})`
+                thisString = `${expressionToString(expression.lValue, Operator.ADD, PositionInOperator.LEFT)} + ${expressionToString(expression.rValue, Operator.ADD, PositionInOperator.RIGHT)}`
+                break
             }
             case Operator.SUB: {
-                return `(${expressionToString(expression.lValue)} - ${expressionToString(expression.rValue)})`
+                thisString = `${expressionToString(expression.lValue, Operator.SUB, PositionInOperator.LEFT)} - ${expressionToString(expression.rValue, Operator.SUB, PositionInOperator.RIGHT)}`
+                break
             }
             case Operator.MUL: {
-                return `(${expressionToString(expression.lValue)} * ${expressionToString(expression.rValue)})`
+                thisString = `${expressionToString(expression.lValue, Operator.MUL, PositionInOperator.LEFT)} * ${expressionToString(expression.rValue, Operator.MUL, PositionInOperator.RIGHT)}`
+                break
             }
             case Operator.DIV: {
-                return `(${expressionToString(expression.lValue)} / ${expressionToString(expression.rValue)})`
+                thisString = `${expressionToString(expression.lValue, Operator.DIV, PositionInOperator.LEFT)} / ${expressionToString(expression.rValue, Operator.DIV, PositionInOperator.RIGHT)}`
+                break
             }
+        }
+        if (needParen) {
+            return `(${thisString})`
+        } else {
+            return thisString
         }
     }
     throw new Error() // satisfy type checker
@@ -146,6 +198,7 @@ function* joinExpressions(expressions: Expression[]): IterableIterator<Expressio
             const dived = new OperationExpression(Operator.DIV, expressions[i], expressions[j])
             yield* joinExpressions(restExp.concat(dived))
             if (!isExpressionIdentical(expressions[i], expressions[j])) {
+                // consider a - b identical to b - a and a / b identical to b / a when a == b
                 const subed2 = new OperationExpression(Operator.SUB, expressions[j], expressions[i])
                 yield* joinExpressions(restExp.concat(subed2))
                 const dived2 = new OperationExpression(Operator.DIV, expressions[j], expressions[i])
