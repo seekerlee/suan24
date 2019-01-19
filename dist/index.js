@@ -208,22 +208,37 @@ function* joinExpressions(expressions) {
     if (expressions.length === 1) {
         yield expressions[0];
     }
+    const selectedPairs = [];
+    function isPairProcessed(pair) {
+        return selectedPairs.some(pairExisting => {
+            return isExpressionIdentical(pairExisting[0], pair[0]) && isExpressionIdentical(pairExisting[1], pair[1]) ||
+                isExpressionIdentical(pairExisting[0], pair[1]) && isExpressionIdentical(pairExisting[1], pair[0]);
+        });
+    }
     for (let i = 0; i < expressions.length; i++) {
         for (let j = i + 1; j < expressions.length; j++) {
+            const leftExp = expressions[i];
+            const rightExp = expressions[j];
+            if (isPairProcessed([leftExp, rightExp])) {
+                continue;
+            }
+            else {
+                selectedPairs.push([leftExp, rightExp]);
+            }
             const restExp = expressions.filter((v, index) => index !== i && index !== j);
-            const added = new OperationExpression(Operator.ADD, expressions[i], expressions[j]);
+            const added = new OperationExpression(Operator.ADD, leftExp, rightExp);
             yield* joinExpressions(restExp.concat(added));
-            const subed = new OperationExpression(Operator.SUB, expressions[i], expressions[j]);
+            const subed = new OperationExpression(Operator.SUB, leftExp, rightExp);
             yield* joinExpressions(restExp.concat(subed));
-            const muled = new OperationExpression(Operator.MUL, expressions[i], expressions[j]);
+            const muled = new OperationExpression(Operator.MUL, leftExp, rightExp);
             yield* joinExpressions(restExp.concat(muled));
-            const dived = new OperationExpression(Operator.DIV, expressions[i], expressions[j]);
+            const dived = new OperationExpression(Operator.DIV, leftExp, rightExp);
             yield* joinExpressions(restExp.concat(dived));
-            if (!isExpressionIdentical(expressions[i], expressions[j])) {
+            if (!isExpressionIdentical(leftExp, rightExp)) {
                 // consider a - b identical to b - a and a / b identical to b / a when a == b
-                const subed2 = new OperationExpression(Operator.SUB, expressions[j], expressions[i]);
+                const subed2 = new OperationExpression(Operator.SUB, rightExp, leftExp);
                 yield* joinExpressions(restExp.concat(subed2));
-                const dived2 = new OperationExpression(Operator.DIV, expressions[j], expressions[i]);
+                const dived2 = new OperationExpression(Operator.DIV, rightExp, leftExp);
                 yield* joinExpressions(restExp.concat(dived2));
             }
         }
