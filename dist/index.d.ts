@@ -4,10 +4,6 @@ declare enum Operator {
     MUL = 2,
     DIV = 3
 }
-declare enum PositionInOperator {
-    LEFT = 0,
-    RIGHT = 1
-}
 declare class FractionalNum {
     readonly num: number;
     readonly den: number;
@@ -33,7 +29,7 @@ declare class OperationExpression {
     private value?;
     constructor(operator: Operator, lValue: Expression, rValue: Expression);
 }
-export declare function expressionToString(expression: Expression, keepParentheses?: boolean, parentOperator?: Operator, position?: PositionInOperator): string;
+export declare const expressionToString: (expression: Expression, keepParentheses?: boolean) => string;
 export declare function suan(target: number, ...nums: number[]): IterableIterator<Expression>;
 export declare const suan24: (...nums: number[]) => IterableIterator<Expression>;
 export {};

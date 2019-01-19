@@ -125,7 +125,8 @@ function evaluate(expression: Expression): FractionalNum | undefined {
     throw new Error("input is not an Expression") // satisfy type checker
 }
 
-export function expressionToString(expression: Expression, keepParentheses: boolean = false, parentOperator?: Operator, position?: PositionInOperator): string {
+export const expressionToString = (expression: Expression, keepParentheses: boolean = false) => exp2Str(expression, keepParentheses)
+function exp2Str(expression: Expression, keepParentheses: boolean = false, parentOperator?: Operator, position?: PositionInOperator): string {
     if (expression instanceof ValueExpression) {
         return expression.value.toString()
     } else if (expression instanceof OperationExpression) {
@@ -156,19 +157,19 @@ export function expressionToString(expression: Expression, keepParentheses: bool
         let thisString: string
         switch (expression.operator) {
             case Operator.ADD: {
-                thisString = `${expressionToString(expression.lValue, keepParentheses, Operator.ADD, PositionInOperator.LEFT)} + ${expressionToString(expression.rValue, keepParentheses, Operator.ADD, PositionInOperator.RIGHT)}`
+                thisString = `${exp2Str(expression.lValue, keepParentheses, Operator.ADD, PositionInOperator.LEFT)} + ${exp2Str(expression.rValue, keepParentheses, Operator.ADD, PositionInOperator.RIGHT)}`
                 break
             }
             case Operator.SUB: {
-                thisString = `${expressionToString(expression.lValue, keepParentheses, Operator.SUB, PositionInOperator.LEFT)} - ${expressionToString(expression.rValue, keepParentheses, Operator.SUB, PositionInOperator.RIGHT)}`
+                thisString = `${exp2Str(expression.lValue, keepParentheses, Operator.SUB, PositionInOperator.LEFT)} - ${exp2Str(expression.rValue, keepParentheses, Operator.SUB, PositionInOperator.RIGHT)}`
                 break
             }
             case Operator.MUL: {
-                thisString = `${expressionToString(expression.lValue, keepParentheses, Operator.MUL, PositionInOperator.LEFT)} × ${expressionToString(expression.rValue, keepParentheses, Operator.MUL, PositionInOperator.RIGHT)}`
+                thisString = `${exp2Str(expression.lValue, keepParentheses, Operator.MUL, PositionInOperator.LEFT)} × ${exp2Str(expression.rValue, keepParentheses, Operator.MUL, PositionInOperator.RIGHT)}`
                 break
             }
             case Operator.DIV: {
-                thisString = `${expressionToString(expression.lValue, keepParentheses, Operator.DIV, PositionInOperator.LEFT)} ÷ ${expressionToString(expression.rValue, keepParentheses, Operator.DIV, PositionInOperator.RIGHT)}`
+                thisString = `${exp2Str(expression.lValue, keepParentheses, Operator.DIV, PositionInOperator.LEFT)} ÷ ${exp2Str(expression.rValue, keepParentheses, Operator.DIV, PositionInOperator.RIGHT)}`
                 break
             } default: {
                 throw new Error("unknow operator")

@@ -40,7 +40,8 @@ console.log(str) // will print ((4 + 6) + ((9 + 89) / 7))
 
 ```typescript
 // 把结果转换为 string
-export declare function expressionToString(expression: Expression): string;
+// keepParentheses 是否保留括号。默认是 false，会去掉非必要的括号
+export declare const expressionToString: (expression: Expression, keepParentheses?: boolean) => string;
 // 算任意数字，第一个参数是目标数字，剩下的是参与计算的数字
 export declare function suan(target: number, ...nums: number[]): IterableIterator<Expression>;
 // 算24，参数是参与计算的数字

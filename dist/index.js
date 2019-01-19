@@ -136,7 +136,8 @@ function evaluate(expression) {
     }
     throw new Error("input is not an Expression"); // satisfy type checker
 }
-function expressionToString(expression, keepParentheses = false, parentOperator, position) {
+exports.expressionToString = (expression, keepParentheses = false) => exp2Str(expression, keepParentheses);
+function exp2Str(expression, keepParentheses = false, parentOperator, position) {
     if (expression instanceof ValueExpression) {
         return expression.value.toString();
     }
@@ -172,19 +173,19 @@ function expressionToString(expression, keepParentheses = false, parentOperator,
         let thisString;
         switch (expression.operator) {
             case Operator.ADD: {
-                thisString = `${expressionToString(expression.lValue, keepParentheses, Operator.ADD, PositionInOperator.LEFT)} + ${expressionToString(expression.rValue, keepParentheses, Operator.ADD, PositionInOperator.RIGHT)}`;
+                thisString = `${exp2Str(expression.lValue, keepParentheses, Operator.ADD, PositionInOperator.LEFT)} + ${exp2Str(expression.rValue, keepParentheses, Operator.ADD, PositionInOperator.RIGHT)}`;
                 break;
             }
             case Operator.SUB: {
-                thisString = `${expressionToString(expression.lValue, keepParentheses, Operator.SUB, PositionInOperator.LEFT)} - ${expressionToString(expression.rValue, keepParentheses, Operator.SUB, PositionInOperator.RIGHT)}`;
+                thisString = `${exp2Str(expression.lValue, keepParentheses, Operator.SUB, PositionInOperator.LEFT)} - ${exp2Str(expression.rValue, keepParentheses, Operator.SUB, PositionInOperator.RIGHT)}`;
                 break;
             }
             case Operator.MUL: {
-                thisString = `${expressionToString(expression.lValue, keepParentheses, Operator.MUL, PositionInOperator.LEFT)} × ${expressionToString(expression.rValue, keepParentheses, Operator.MUL, PositionInOperator.RIGHT)}`;
+                thisString = `${exp2Str(expression.lValue, keepParentheses, Operator.MUL, PositionInOperator.LEFT)} × ${exp2Str(expression.rValue, keepParentheses, Operator.MUL, PositionInOperator.RIGHT)}`;
                 break;
             }
             case Operator.DIV: {
-                thisString = `${expressionToString(expression.lValue, keepParentheses, Operator.DIV, PositionInOperator.LEFT)} ÷ ${expressionToString(expression.rValue, keepParentheses, Operator.DIV, PositionInOperator.RIGHT)}`;
+                thisString = `${exp2Str(expression.lValue, keepParentheses, Operator.DIV, PositionInOperator.LEFT)} ÷ ${exp2Str(expression.rValue, keepParentheses, Operator.DIV, PositionInOperator.RIGHT)}`;
                 break;
             }
             default: {
@@ -200,7 +201,6 @@ function expressionToString(expression, keepParentheses = false, parentOperator,
     }
     throw new Error("not an expression"); // satisfy type checker
 }
-exports.expressionToString = expressionToString;
 function* joinExpressions(expressions) {
     if (expressions.length === 0) {
         throw new Error("no input error");
