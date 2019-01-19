@@ -187,6 +187,9 @@ function expressionToString(expression, keepParentheses = false, parentOperator,
                 thisString = `${expressionToString(expression.lValue, keepParentheses, Operator.DIV, PositionInOperator.LEFT)} ÷ ${expressionToString(expression.rValue, keepParentheses, Operator.DIV, PositionInOperator.RIGHT)}`;
                 break;
             }
+            default: {
+                throw new Error("unknow operator");
+            }
         }
         if (needParen) {
             return `(${thisString})`;
@@ -195,7 +198,7 @@ function expressionToString(expression, keepParentheses = false, parentOperator,
             return thisString;
         }
     }
-    throw new Error(); // satisfy type checker
+    throw new Error("not an expression"); // satisfy type checker
 }
 exports.expressionToString = expressionToString;
 function* joinExpressions(expressions) {
