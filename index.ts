@@ -171,7 +171,7 @@ export function expressionToString(expression: Expression, keepParentheses: bool
                 thisString = `${expressionToString(expression.lValue, keepParentheses, Operator.DIV, PositionInOperator.LEFT)} ÷ ${expressionToString(expression.rValue, keepParentheses, Operator.DIV, PositionInOperator.RIGHT)}`
                 break
             } default: {
-                throw new Error("unknow operatir")
+                throw new Error("unknow operator")
             }
         }
         if (needParen) {
