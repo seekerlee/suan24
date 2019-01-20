@@ -108,3 +108,6 @@ export declare const suan24: (...nums: number[]) => IterableIterator<Expression>
 - [ ] 增加一个网页直接操作
 - [ ] 支持 BigInt 解决大数字精度问题
 
+## License
+
+[WTFPL](http://www.wtfpl.net)
