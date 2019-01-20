@@ -51,7 +51,7 @@ export declare const suan24: (...nums: number[]) => IterableIterator<Expression>
 ## Future work (Maybe)
 
 - [x] 去除结果中无必要的括号
-- [ ] 去掉重复的结果
+- [x] 去掉重复的结果
 - [ ] 增加一个网页直接操作
 - [ ] 支持 BigInt 解决大数字精度问题
 
