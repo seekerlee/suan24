@@ -10,19 +10,14 @@ enum PositionInOperator {
 }
 
 function OperatorCompare(op1: Operator, op2: Operator): number {
-    if (op1 === Operator.ADD || op1 === Operator.SUB) {
-        if (op2 === Operator.ADD || op2 === Operator.SUB) {
-            return 0
-        } else { // op2 === Operator.MUL || op2 === Operator.DIV
-            return -1
-        }
-    } else { // op1 === Operator.MUL || op1 === Operator.DIV
-        if (op2 === Operator.ADD || op2 === Operator.SUB) {
-            return 1
-        } else { // op2 === Operator.MUL || op2 === Operator.DIV
+    function orderOfOp(op: Operator): number {
+        if (op === Operator.ADD || op === Operator.SUB) {
             return 0
         }
+        // else if (op === Operator.MUL || op === Operator.DIV)
+        return 1
     }
+    return orderOfOp(op1) - orderOfOp(op2)
 }
 
 Number.isInteger = Number.isInteger || ((value: any) => {
@@ -193,10 +188,11 @@ function* joinExpressions(expressions: Expression[]): IterableIterator<Expressio
     }
     const selectedPairs: Array<[Expression, Expression]> = []
     function isPairProcessed(pair: [Expression, Expression]): boolean {
-        return selectedPairs.some( pairExisting => {
-            return isExpressionIdentical(pairExisting[0], pair[0]) && isExpressionIdentical(pairExisting[1], pair[1]) ||
-                isExpressionIdentical(pairExisting[0], pair[1]) && isExpressionIdentical(pairExisting[1], pair[0])
-        })
+        function isPairIdentical(p1: [Expression, Expression], p2: [Expression, Expression]) {
+            return isExpressionIdentical(p1[0], p2[0]) && isExpressionIdentical(p1[1], p2[1]) ||
+                isExpressionIdentical(p1[0], p2[1]) && isExpressionIdentical(p1[1], p2[0])
+        }
+        return selectedPairs.some(pairExisting => isPairIdentical(pairExisting, pair))
     }
     for (let i = 0; i < expressions.length; i ++) {
         for (let j = i + 1; j < expressions.length; j ++) {
@@ -209,13 +205,13 @@ function* joinExpressions(expressions: Expression[]): IterableIterator<Expressio
             }
             const restExp = expressions.filter((v, index) => index !== i && index !== j )
             const added = new OperationExpression(Operator.ADD, leftExp, rightExp)
-            yield* joinExpressions(restExp.concat(added))
+            yield* joinExpressions([added as Expression].concat(restExp))
             const subed = new OperationExpression(Operator.SUB, leftExp, rightExp)
-            yield* joinExpressions(restExp.concat(subed))
+            yield* joinExpressions([subed as Expression].concat(restExp))
             const muled = new OperationExpression(Operator.MUL, leftExp, rightExp)
-            yield* joinExpressions(restExp.concat(muled))
+            yield* joinExpressions([muled as Expression].concat(restExp))
             const dived = new OperationExpression(Operator.DIV, leftExp, rightExp)
-            yield* joinExpressions(restExp.concat(dived))
+            yield* joinExpressions([dived as Expression].concat(restExp))
             if (!isExpressionIdentical(leftExp, rightExp)) {
                 // consider a - b identical to b - a and a / b identical to b / a when a == b
                 const subed2 = new OperationExpression(Operator.SUB, rightExp, leftExp)
