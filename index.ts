@@ -179,19 +179,20 @@ function exp2Str(expression: Expression, keepParentheses: boolean = false, paren
     throw new Error("not an expression") // satisfy type checker
 }
 
-function* joinExpressions(expressions: Expression[]): IterableIterator<Expression> {
+type ExpressionPair = [Expression, Expression]
+function isPairIdentical(p1: ExpressionPair, p2: ExpressionPair) {
+    return isExpressionIdentical(p1[0], p2[0]) && isExpressionIdentical(p1[1], p2[1]) ||
+        isExpressionIdentical(p1[0], p2[1]) && isExpressionIdentical(p1[1], p2[0])
+}
+
+function* joinExpressions(expressions: Expression[], selectedPairs: ExpressionPair[]): IterableIterator<Expression> {
     if (expressions.length === 0) {
         throw new Error("no input error")
     }
     if (expressions.length === 1) {
         yield expressions[0]
     }
-    const selectedPairs: Array<[Expression, Expression]> = []
-    function isPairProcessed(pair: [Expression, Expression]): boolean {
-        function isPairIdentical(p1: [Expression, Expression], p2: [Expression, Expression]) {
-            return isExpressionIdentical(p1[0], p2[0]) && isExpressionIdentical(p1[1], p2[1]) ||
-                isExpressionIdentical(p1[0], p2[1]) && isExpressionIdentical(p1[1], p2[0])
-        }
+    function isPairProcessed(pair: ExpressionPair): boolean {
         return selectedPairs.some(pairExisting => isPairIdentical(pairExisting, pair))
     }
     for (let i = 0; i < expressions.length; i ++) {
@@ -199,25 +200,26 @@ function* joinExpressions(expressions: Expression[]): IterableIterator<Expressio
             const leftExp = expressions[i]
             const rightExp = expressions[j]
             if (isPairProcessed([leftExp, rightExp])) {
+                // prevent same number calculated multipile times, i.e: 8,8,3,3
                 continue
             } else {
                 selectedPairs.push([leftExp, rightExp])
             }
             const restExp = expressions.filter((v, index) => index !== i && index !== j )
             const added = new OperationExpression(Operator.ADD, leftExp, rightExp)
-            yield* joinExpressions([added as Expression].concat(restExp))
+            yield* joinExpressions([added as Expression].concat(restExp), selectedPairs.slice(0))
             const subed = new OperationExpression(Operator.SUB, leftExp, rightExp)
-            yield* joinExpressions([subed as Expression].concat(restExp))
+            yield* joinExpressions([subed as Expression].concat(restExp), selectedPairs.slice(0))
             const muled = new OperationExpression(Operator.MUL, leftExp, rightExp)
-            yield* joinExpressions([muled as Expression].concat(restExp))
+            yield* joinExpressions([muled as Expression].concat(restExp), selectedPairs.slice(0))
             const dived = new OperationExpression(Operator.DIV, leftExp, rightExp)
-            yield* joinExpressions([dived as Expression].concat(restExp))
+            yield* joinExpressions([dived as Expression].concat(restExp), selectedPairs.slice(0))
             if (!isExpressionIdentical(leftExp, rightExp)) {
                 // consider a - b identical to b - a and a / b identical to b / a when a == b
                 const subed2 = new OperationExpression(Operator.SUB, rightExp, leftExp)
-                yield* joinExpressions(restExp.concat(subed2))
+                yield* joinExpressions(restExp.concat(subed2), selectedPairs.slice(0))
                 const dived2 = new OperationExpression(Operator.DIV, rightExp, leftExp)
-                yield* joinExpressions(restExp.concat(dived2))
+                yield* joinExpressions(restExp.concat(dived2), selectedPairs.slice(0))
             }
         }
     }
@@ -225,7 +227,7 @@ function* joinExpressions(expressions: Expression[]): IterableIterator<Expressio
 
 export function* suan(target: number, ...nums: number[]) {
     const exps = nums.map((num) => new ValueExpression(new FractionalNum(num)))
-    const expressionIter = joinExpressions(exps)
+    const expressionIter = joinExpressions(exps, [])
     while (true) {
         const it = expressionIter.next()
         if (it.done) {
