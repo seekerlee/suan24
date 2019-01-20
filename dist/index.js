@@ -13,22 +13,14 @@ var PositionInOperator;
     PositionInOperator[PositionInOperator["RIGHT"] = 1] = "RIGHT";
 })(PositionInOperator || (PositionInOperator = {}));
 function OperatorCompare(op1, op2) {
-    if (op1 === Operator.ADD || op1 === Operator.SUB) {
-        if (op2 === Operator.ADD || op2 === Operator.SUB) {
+    function orderOfOp(op) {
+        if (op === Operator.ADD || op === Operator.SUB) {
             return 0;
         }
-        else { // op2 === Operator.MUL || op2 === Operator.DIV
-            return -1;
-        }
+        // else if (op === Operator.MUL || op === Operator.DIV)
+        return 1;
     }
-    else { // op1 === Operator.MUL || op1 === Operator.DIV
-        if (op2 === Operator.ADD || op2 === Operator.SUB) {
-            return 1;
-        }
-        else { // op2 === Operator.MUL || op2 === Operator.DIV
-            return 0;
-        }
-    }
+    return orderOfOp(op1) - orderOfOp(op2);
 }
 Number.isInteger = Number.isInteger || ((value) => {
     return typeof value === "number" &&
@@ -201,25 +193,26 @@ function exp2Str(expression, keepParentheses = false, parentOperator, position) 
     }
     throw new Error("not an expression"); // satisfy type checker
 }
-function* joinExpressions(expressions) {
+function isPairIdentical(p1, p2) {
+    return isExpressionIdentical(p1[0], p2[0]) && isExpressionIdentical(p1[1], p2[1]) ||
+        isExpressionIdentical(p1[0], p2[1]) && isExpressionIdentical(p1[1], p2[0]);
+}
+function* joinExpressions(expressions, selectedPairs) {
     if (expressions.length === 0) {
         throw new Error("no input error");
     }
     if (expressions.length === 1) {
         yield expressions[0];
     }
-    const selectedPairs = [];
     function isPairProcessed(pair) {
-        return selectedPairs.some(pairExisting => {
-            return isExpressionIdentical(pairExisting[0], pair[0]) && isExpressionIdentical(pairExisting[1], pair[1]) ||
-                isExpressionIdentical(pairExisting[0], pair[1]) && isExpressionIdentical(pairExisting[1], pair[0]);
-        });
+        return selectedPairs.some(pairExisting => isPairIdentical(pairExisting, pair));
     }
     for (let i = 0; i < expressions.length; i++) {
         for (let j = i + 1; j < expressions.length; j++) {
             const leftExp = expressions[i];
             const rightExp = expressions[j];
             if (isPairProcessed([leftExp, rightExp])) {
+                // prevent same number calculated multipile times, i.e: 8,8,3,3
                 continue;
             }
             else {
@@ -227,26 +220,26 @@ function* joinExpressions(expressions) {
             }
             const restExp = expressions.filter((v, index) => index !== i && index !== j);
             const added = new OperationExpression(Operator.ADD, leftExp, rightExp);
-            yield* joinExpressions(restExp.concat(added));
+            yield* joinExpressions([added].concat(restExp), selectedPairs.slice(0));
             const subed = new OperationExpression(Operator.SUB, leftExp, rightExp);
-            yield* joinExpressions(restExp.concat(subed));
+            yield* joinExpressions([subed].concat(restExp), selectedPairs.slice(0));
             const muled = new OperationExpression(Operator.MUL, leftExp, rightExp);
-            yield* joinExpressions(restExp.concat(muled));
+            yield* joinExpressions([muled].concat(restExp), selectedPairs.slice(0));
             const dived = new OperationExpression(Operator.DIV, leftExp, rightExp);
-            yield* joinExpressions(restExp.concat(dived));
+            yield* joinExpressions([dived].concat(restExp), selectedPairs.slice(0));
             if (!isExpressionIdentical(leftExp, rightExp)) {
                 // consider a - b identical to b - a and a / b identical to b / a when a == b
                 const subed2 = new OperationExpression(Operator.SUB, rightExp, leftExp);
-                yield* joinExpressions(restExp.concat(subed2));
+                yield* joinExpressions(restExp.concat(subed2), selectedPairs.slice(0));
                 const dived2 = new OperationExpression(Operator.DIV, rightExp, leftExp);
-                yield* joinExpressions(restExp.concat(dived2));
+                yield* joinExpressions(restExp.concat(dived2), selectedPairs.slice(0));
             }
         }
     }
 }
 function* suan(target, ...nums) {
     const exps = nums.map((num) => new ValueExpression(new FractionalNum(num)));
-    const expressionIter = joinExpressions(exps);
+    const expressionIter = joinExpressions(exps, []);
     while (true) {
         const it = expressionIter.next();
         if (it.done) {
