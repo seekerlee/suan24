@@ -1,7 +1,7 @@
 # suan24(算24)
 这是一个算 24 的程序，可以在 node 或者浏览器中使用。
 
-默认编译为 ES2015 的 JavaScript, 如果需要 ES5 可以 clone 后自行编译，编辑结果是 dist/index.js：
+默认编译为 ES2015 的 JavaScript, 如果需要 ES5 可以 clone 后自行编译，编译结果是 dist/index.js：
 
 ```bash
 git clone git@github.com:seekerlee/suan24.git
