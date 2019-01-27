@@ -108,7 +108,7 @@ export declare const suan24: (...nums: number[]) => IterableIterator<Expression>
 
 效果：
 
-![preview](https://user-images.githubusercontent.com/1234986/51798947-97736f00-2255-11e9-851c-eae11aab1323.jpg)
+![preview](https://user-images.githubusercontent.com/1234986/51799028-fbe2fe00-2256-11e9-8d62-7e461969a8d9.png)
 
 ## Future work (Maybe)
 
