@@ -100,11 +100,21 @@ export declare function suan(target: number, ...nums: number[]): IterableIterato
 export declare const suan24: (...nums: number[]) => IterableIterator<Expression>;
 ```
 
+## 微信小程序
+
+基于这个库的一个微信小程序，二维码：
+
+![wechat-mini-program](https://user-images.githubusercontent.com/1234986/51798918-216f0800-2255-11e9-900f-806cedf062fa.jpg)
+
+效果：
+
+![preview](https://user-images.githubusercontent.com/1234986/51798947-97736f00-2255-11e9-851c-eae11aab1323.jpg)
+
 ## Future work (Maybe)
 
 - [x] 去除结果中无必要的括号
 - [x] 去掉重复的结果
-- [ ] 改进去重复的性能，现在是 O(n^2)
+- [ ] 改进去重复的性能
 - [ ] 增加一个网页直接操作
 - [ ] 支持 BigInt 解决大数字精度问题
 
